@@ -1,0 +1,137 @@
+<html>
+<head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no"/>
+    <style type="text/css">
+        html {
+            height: 100%
+        }
+
+        body {
+            height: 100%;
+            margin: 0px;
+            padding: 0px
+        }
+
+        #map_canvas {
+            height: 100%
+        }
+    </style>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://maps.google.com/maps/api/js?sensor=false">
+    </script>
+    <script type="text/javascript">
+        $(function () {
+            $.ajax({
+                url: "http://im.someline.com/mha",
+                dataType: "jsonp",
+                success: function (data) {
+                    var dataString = JSON.stringify(data, null, 4);
+                    initialize(data);
+                },
+                fail: function () {
+                    alert("error")
+                }
+            });
+        });
+        function initialize(data) {
+
+            // Try HTML5 geolocation
+            if(navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    var pos = new google.maps.LatLng(position.coords.latitude,
+                            position.coords.longitude);
+
+                    var infowindow = new google.maps.InfoWindow({
+                        map: map,
+                        position: pos
+//                        content: 'Location found using HTML5.'
+                    });
+
+//                    map.setCenter(pos);
+                    console.log(pos);
+//<<<<<
+//<Change logo for marker>
+
+                    var image = 'images/icon-current-location.png';
+
+
+//                    var myLatLng = new google.maps.LatLng(-33.890542, 151.274856);
+                    var beachMarker = new google.maps.Marker({
+                        position: pos,
+                        map: map,
+                        icon: image
+                    });
+
+
+
+
+                }, function() {
+                    handleNoGeolocation(true);
+                });
+            } else {
+                // Browser doesn't support Geolocation
+                handleNoGeolocation(false);
+            }
+            ////////////////
+
+
+
+            var latlng = new google.maps.LatLng(1.3469268,103.8378561);
+            var myOptions = {
+                zoom: 11,
+                center: latlng,
+                mapTypeId: google.maps.MapTypeId.ROADMAP
+            };
+            var map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+
+
+            function addMarker(markerObj) {
+                var hLatlng = new google.maps.LatLng(markerObj.latitude, markerObj.longtitude);
+                var infoTitle =
+                        "<div style='padding-left: 75px;padding-top:1px;margin-right:20px;position: relative;'><img src='images/police.jpg' width='50px' style='left: 10px;top:5px;position: absolute;'><p style='font-size: 16px; font-weight: bold; color: #010355; min-width: 110%;'>" + markerObj.name + "</p></div>" +
+                        "<hr/><p><b>Address: </b>" + markerObj.address + "<br/>"+
+                        "<b>Postal Code: </b>" + markerObj.postal_code + "</p>"+
+                        "<b>Operating Hours: </b>" + markerObj.time + "</p>"+
+                        "<b>Contact: </b>" + markerObj.contact + "</p>";
+
+                var hTitle = "click for more details";
+
+                var infowindow = new google.maps.InfoWindow({
+                    content: infoTitle
+                });
+//>>>>>>>
+
+                var image1="images/npc.png";
+                var marker = new google.maps.Marker({
+                    position: hLatlng,
+                    map: map,
+                    title: hTitle,
+                    icon: image1
+
+                });
+
+                google.maps.event.addListener(marker,
+                        'click', infoCallback(infowindow, marker));
+
+            }
+
+            function infoCallback(infowindow, marker) {
+                return function () {
+                    infowindow.open(map, marker);
+                };
+            }
+
+
+            $.each(data, function (key, val) {
+                console.log(val);
+                addMarker(val);
+            });
+
+        }
+    </script>
+</head>
+<body>
+<div id="map_canvas" style="width:100%; height:100%"></div>
+<div class="hi"></div>
+</body>
+</html>
